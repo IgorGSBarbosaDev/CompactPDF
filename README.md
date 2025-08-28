@@ -60,7 +60,3 @@ src/
 - PyPDF2
 - Pillow
 - reportlab
-
-## License
-
-MIT License
