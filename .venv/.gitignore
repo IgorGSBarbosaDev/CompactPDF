@@ -42,6 +42,7 @@ logs/
 data/
 *.pdf
 !examples/*.pdf
+tests/
 
 # Sistema
 .DS_Store
