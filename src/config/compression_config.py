@@ -247,7 +247,7 @@ class CompressionConfig:
         self.image_config.max_dpi = 150
         
         self.stream_config.compression_level = 6
-        self.stream_config.recompress_streams = False
+        self.stream_config.recompress_streams = True
         
         self.font_config.remove_unused_fonts = True
         self.metadata_config.remove_unused_metadata = True
