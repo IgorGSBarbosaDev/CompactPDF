@@ -18,6 +18,14 @@ def main():
     print()
     
     try:
+        import sys
+        import os
+        
+        # Adicionar src ao path se necessário
+        src_path = os.path.join(os.path.dirname(__file__), "src")
+        if src_path not in sys.path:
+            sys.path.insert(0, src_path)
+        
         from config.compression_config import CompressionConfig, CompressionLevel
         from pdf_compressor_facade import PDFCompressorFacade
         
