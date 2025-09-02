@@ -24,15 +24,48 @@ from datetime import datetime
 from pathlib import Path
 import json
 
-# Importações do CompactPDF
+# Adicionar diretório atual ao path para resolver imports
+import sys
+from pathlib import Path
+import os
+
+# Configurar paths de forma mais robusta
+current_dir = Path(__file__).parent
+src_dir = current_dir / "src"
+
+# Adicionar múltiplos paths possíveis
+paths_to_add = [
+    str(src_dir),
+    str(current_dir),
+    os.path.join(str(current_dir), "src")
+]
+
+for path in paths_to_add:
+    if path not in sys.path:
+        sys.path.insert(0, path)
+
+# Importações do CompactPDF com fallbacks
 try:
-    from src.pdf_compressor_facade import PDFCompressorFacade
-    from src.config.compression_config import CompressionConfig, CompressionLevel
-    from src.models.compression_result import CompressionResult
-except ImportError as e:
-    print(f"Erro ao importar módulos do CompactPDF: {e}")
-    print("Certifique-se de que o projeto está configurado corretamente.")
-    exit(1)
+    # Tentar importação direta
+    from pdf_compressor_facade import PDFCompressorFacade
+    from config.compression_config import CompressionConfig, CompressionLevel
+    from models.compression_result import CompressionResult
+except ImportError:
+    try:
+        # Tentar importação com src prefix
+        from src.pdf_compressor_facade import PDFCompressorFacade
+        from src.config.compression_config import CompressionConfig, CompressionLevel
+        from src.models.compression_result import CompressionResult
+    except ImportError as e:
+        print(f"Erro crítico ao importar módulos do CompactPDF: {e}")
+        print(f"Diretório atual: {current_dir}")
+        print(f"Diretório src: {src_dir}")
+        print(f"Python path: {sys.path[:5]}")
+        print("\nVerifique se:")
+        print("1. O arquivo está no diretório raiz do projeto")
+        print("2. O diretório 'src' existe e contém os módulos")
+        print("3. Os arquivos __init__.py existem nos diretórios necessários")
+        exit(1)
 
 
 class CompactPDFGUI:
@@ -764,28 +797,33 @@ class CompactPDFGUI:
     
     def criar_configuracao(self):
         """Cria configuração baseada nas opções selecionadas."""
-        if self.mostrar_avancado.get():
+        config = CompressionConfig()
+        
+        if self.mostrar_avancado.get() and hasattr(self, 'qualidade_var'):
             # Configuração personalizada
-            config = CompressionConfig()
-            
             # Aplicar configurações da interface
-            config.image_config.jpeg_quality = self.qualidade_imagem_var.get()
-            config.image_config.max_dpi = self.dpi_var.get()
-            config.performance_config.use_cache = self.usar_cache.get()
-            config.backup_config.create_backup = self.criar_backup.get()
-            config.performance_config.max_threads = 4 if self.processamento_paralelo.get() else 1
+            if hasattr(self, 'qualidade_imagem_var'):
+                config.image_config.jpeg_quality = self.qualidade_imagem_var.get()
+            if hasattr(self, 'dpi_var'):
+                config.image_config.max_dpi = self.dpi_var.get()
             
             # Definir nível baseado na qualidade
             qualidade = self.qualidade_var.get()
-            if qualidade <= 3:
+            if qualidade <= 30:
                 config.apply_preset(CompressionLevel.AGGRESSIVE)
-            elif qualidade <= 7:
+            elif qualidade <= 70:
                 config.apply_preset(CompressionLevel.BALANCED)
             else:
                 config.apply_preset(CompressionLevel.MINIMAL)
         else:
-            # Usar preset
-            config = CompressionConfig()
+            # Usar preset selecionado
+            preset_map = {
+                "minimal": CompressionLevel.MINIMAL,
+                "balanced": CompressionLevel.BALANCED, 
+                "aggressive": CompressionLevel.AGGRESSIVE
+            }
+            preset = preset_map.get(self.preset_var.get(), CompressionLevel.BALANCED)
+            config.apply_preset(preset)
             preset_name = self.preset_var.get()
             
             if preset_name == "minimal":
@@ -794,9 +832,6 @@ class CompactPDFGUI:
                 config.apply_preset(CompressionLevel.BALANCED)
             elif preset_name == "aggressive":
                 config.apply_preset(CompressionLevel.AGGRESSIVE)
-            
-            # Aplicar configurações gerais
-            config.backup_config.create_backup = self.criar_backup.get()
         
         return config
     
