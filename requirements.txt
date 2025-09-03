@@ -1,24 +1,14 @@
-# PDF Compression Tool Requirements
+# CompactPDF - Dependências Essenciais
+# Apenas PyMuPDF e Spire.PDF para compressão eficaz
 
-# Core PDF manipulation
-PyPDF2==3.0.1
+# Método principal - PyMuPDF
+pymupdf>=1.24.0
 
-# Image processing and quality assessment
-Pillow==10.0.0
-numpy>=1.24.0
+# Método alternativo - Spire.PDF
+Spire.PDF>=9.0.0
 
-# PDF generation for testing
-reportlab==4.0.4
-
-# Type hints support
-typing-extensions==4.7.1
-
-# Testing framework
-pytest>=7.0.0
-pytest-cov>=4.0.0
-
-# Progress tracking and user interface
-tqdm>=4.64.0
-
-# System monitoring for cache management
-psutil>=5.9.0
+# Dependências do sistema (geralmente já incluídas)
+# tkinter - interface gráfica (incluído no Python)
+# pathlib - manipulação de caminhos (incluído no Python 3.4+)
+# threading - processamento paralelo (incluído no Python)
+# enum - enumerações (incluído no Python 3.4+)
